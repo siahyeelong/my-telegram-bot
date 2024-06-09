@@ -6,8 +6,8 @@ This is a Telegram bot that schedules a message every Monday at 6 AM to tell you
 
 1. **Clone the Repository**:
     ```bash
-    git clone <your-repository-url>
-    cd <your-repository-folder>
+    git clone https://github.com/siahyeelong/my-telegram-bot.git
+    cd my-telegram-bot
     ```
 2. **Create and Activate a Virtual Environment**:
 - **On Windows**:
