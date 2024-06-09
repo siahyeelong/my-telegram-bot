@@ -1,4 +1,5 @@
-from telegram.ext import ContextTypes, Application
+from telegram import Update
+from telegram.ext import ContextTypes, Application, CommandHandler
 from keys import TOKEN, CHAT_ID
 
 from datetime import time
@@ -26,8 +27,18 @@ def get_wotw() -> str:
             return f"{row[0]}\n\n{row[1]}\n\n{row[2]}\n{row[3]}\n{row[4]}"
     return "No more words left to teach you!"
 
+# Handlers
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("hello! bot has started!")
+    
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("this bot sends you a new word + its definition + 3 uses in a sentence every Monday at 6am. have fun learning!")
+
 async def scheduled_messager(context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=CHAT_ID, text=get_wotw())
+    
+async def error_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error(f"Update {update} caused error: {context.error}")
 
 
 if __name__=="__main__":
@@ -41,4 +52,8 @@ if __name__=="__main__":
                                      time=time(6, 0, 0, tzinfo=timezone),   # 6am
                                      days=(0,))                             # Monday is represented by 0
 
-    application.run_polling(poll_interval=(3600*2)) # polls every 2h
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_error_handler(error_message)
+    
+    application.run_polling(poll_interval=2)

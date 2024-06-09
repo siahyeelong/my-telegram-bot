@@ -3,3 +3,4 @@ venv
 test*
 example*
 __pycache__
+nohup*
