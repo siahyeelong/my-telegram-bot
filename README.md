@@ -29,5 +29,5 @@ This is a Telegram bot that schedules a message every Monday at 6 AM to tell you
 ## Usage
 Run the Main Program:
 ```bash
-python main.py
+python main_bot.py
 ```
