@@ -80,6 +80,7 @@ class SQL_Database:
 
     def get_chat_count(self, id: int) -> int:
         '''
+        [NOT USED]
         This function returns the chat_count for the corresponding chat_id
         '''
         try:
@@ -113,3 +114,37 @@ class SQL_Database:
         except mysql.connector.Error as err:
             logger.error(f"Error: {err}")
             return (0, 0, 0)
+        
+    def reset_chat_count(self, id: int) -> None:
+        '''
+        This function resets the chat_count and thread_ID for a specified chat_id
+        '''
+        try:
+            query = f"UPDATE {SQL_TABLE_NAME} SET chat_count = 0, thread_id = %s WHERE chat_id = %s"
+            assistant = GPT_assistant()
+            values = (assistant.create_new_thread(),id)
+            self.cursor.execute(query, values)
+            self.db.commit()
+            logger.info(f"Resetted chat_count for chat_id {id}.")
+        except mysql.connector.Error as err:
+            logger.error(f"Error: {err}")
+            self.db.rollback()
+            
+    def close(self):
+        '''Close the cursor and the database connection.'''
+        if self.cursor:
+            self.cursor.close()
+        if self.db:
+            self.db.close()
+    
+    def __enter__(self):
+        '''Enter the runtime context related to this object.'''
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        '''Exit the runtime context related to this object.'''
+        self.close()
+    
+    def __del__(self):
+        '''Destructor to ensure resources are released when the instance is deleted.'''
+        self.close()

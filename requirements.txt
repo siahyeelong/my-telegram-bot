@@ -6,6 +6,7 @@ bs4==0.0.2
 certifi==2024.6.2
 charset-normalizer==3.3.2
 click==8.1.7
+colorama==0.4.6
 distro==1.9.0
 exceptiongroup==1.2.1
 futures==3.0.5

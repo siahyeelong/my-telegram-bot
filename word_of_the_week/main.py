@@ -1,6 +1,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes, Application, CommandHandler
-from keys import TOKEN, CHAT_ID
+from keys import TELEGRAM_TOKEN, MAIN_CHAT_ID
+from sql_backend import SQL_Database
+database = SQL_Database()
 
 from datetime import time
 import pytz
@@ -11,11 +13,8 @@ csv_filename: str = "words.csv"
 df = pd.read_csv(csv_filename)
 
 # Logging set up
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
+from logger import setup_logger
+logger = setup_logger()
 
 # Function that gets and formats the new word of the week
 def get_wotw() -> str:
@@ -29,22 +28,29 @@ def get_wotw() -> str:
 
 # Handlers
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("hello! bot has started!")
+    database.insert_new_chat_id(update.message.chat.id, update.message.chat.username)
+    await update.message.reply_text("welcome! you have just been subscribed to the weekly word-of-the-week message! if you wish to unsubscribe, just /unsubscribe")
     
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("this bot sends you a new word + its definition + 3 uses in a sentence every Monday at 6am. have fun learning!")
+    await update.message.reply_text("this bot sends you a new word + its definition + 3 uses in a sentence every Monday at 6am. have fun learning!\n\n/start -- enrol in the weekly scheduled message\n/unsubscribe -- unsubscribe from the weekly message")
+    
+async def unsubscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    database.delete_record(update.message.chat.id)
+    await update.message.reply_text("you have been unsubscribed. hope you had fun learning!")
 
 async def scheduled_messager(context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=CHAT_ID, text=get_wotw())
+    wotw = get_wotw()
+    ID_list = database.get_all_records()
+    for ID in ID_list:
+        await context.bot.send_message(chat_id=ID, text=wotw)
     
 async def error_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error(f"Update {update} caused error: {context.error}")
 
-
 if __name__=="__main__":
     logger.info("bot has started...")
     
-    application = Application.builder().token(TOKEN).build()
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
     job_queue = application.job_queue
 
     # Schedule the job to run at 6 AM every Monday
@@ -54,6 +60,7 @@ if __name__=="__main__":
 
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("unsubscribe", unsubscribe_command))
     application.add_error_handler(error_message)
     
     application.run_polling(poll_interval=2)
