@@ -1,5 +1,9 @@
 import mysql.connector
 from keys import SQL_DATABASE_PASSWORD, SQL_DATABASE_NAME, SQL_TABLE_NAME
+from chatgpt_assistant import GPT_assistant
+
+from logger import setup_logger
+logger = setup_logger()
 
 class SQL_Database:
     def __init__(self) -> None:
@@ -21,25 +25,43 @@ class SQL_Database:
             database=SQL_DATABASE_NAME
         )
         self.cursor = self.db.cursor()
-        # create the columns: chat_id, chat_count, max_count
+        # create the columns: chat_id, chat_count, max_count, TODO: create thread_id column
         self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS {SQL_TABLE_NAME} (
                                 chat_id BIGINT NOT NULL PRIMARY KEY,  -- Assuming chat IDs are large integers
                                 chat_count INT NOT NULL CHECK (chat_count <= 1024),
-                                max_count INT NOT NULL DEFAULT 1024 CHECK (max_count <= 1024)
+                                max_count INT NOT NULL DEFAULT 1024 CHECK (max_count <= 1024),
+                                thread_id VARCHAR(255) NOT NULL
                             );""")
         
     def insert_new_chat_id(self, id: int) -> None:
         '''
-        This function inserts a new id into the chat_id column and initializes the 
-        chat_count to 0 and max_count to 10
+        This function checks if the chat id is already in the table. If yes, simply return and do nothing.
+        If chat id doesn't exist yet, insert a new id into the chat_id column and initializes the 
+        chat_count to 0 and max_count to 10, and thread_id to whatever that was generated.
         '''
         try:
-            query = f"INSERT IGNORE INTO {SQL_TABLE_NAME} (chat_id, chat_count, max_count) VALUES (%s, %s, %s)"
-            values = (id, 0, 10)
-            self.cursor.execute(query, values)
+            # Check if the chat_id already exists
+            query_check = f"SELECT 1 FROM {SQL_TABLE_NAME} WHERE chat_id = %s"
+            self.cursor.execute(query_check, (id,))
+            exists = self.cursor.fetchone()
+
+            if exists:
+                logger.info(f"chat_id {id} already exists. Skipping insert.")
+                return
+
+            # If the chat_id does not exist, insert it
+            query_insert = f"INSERT INTO {SQL_TABLE_NAME} (chat_id, chat_count, max_count, thread_id) VALUES (%s, %s, %s, %s)"
+            
+            # Generate the threadID here
+            assistant = GPT_assistant()
+            threadID = assistant.create_new_thread()
+            values = (id, 0, 10, threadID)
+            self.cursor.execute(query_insert, values)
+            
             self.db.commit()
+            logger.info(f"Inserted chat_id {id} with chat_count 0, max_count 10, and thread_id {threadID}.")
         except mysql.connector.Error as err:
-            print(f"Maybe not Error: {err}\nOr user id could have already existed")
+            logger.error(f"Error: {err}")
             self.db.rollback()
 
     def increment_chat_count(self, id: int) -> None:
@@ -51,9 +73,9 @@ class SQL_Database:
             values = (id,)
             self.cursor.execute(query, values)
             self.db.commit()
-            print(f"Incremented chat_count for chat_id {id}.")
+            logger.info(f"Incremented chat_count for chat_id {id}.")
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            logger.error(f"Error: {err}")
             self.db.rollback()
 
     def get_chat_count(self, id: int) -> int:
@@ -68,26 +90,26 @@ class SQL_Database:
             if result:
                 return result[0]
             else:
-                print(f"No entry found for chat_id {id}.")
+                logger.debug(f"No entry found for chat_id {id}.")
                 return 0
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            logger.error(f"Error: {err}")
             return 0
         
-    def get_chat_and_max_count(self, id: int) -> tuple:
+    def get_row(self, id: int) -> tuple:
         '''
-        This function returns both chat_count and max_count for the corresponding chat_id
+        This function returns the row of data according to the chat_id
         '''
         try:
-            query = f"SELECT chat_count, max_count FROM {SQL_TABLE_NAME} WHERE chat_id = %s"
+            query = f"SELECT chat_count, max_count, thread_id FROM {SQL_TABLE_NAME} WHERE chat_id = %s"
             values = (id,)
             self.cursor.execute(query, values)
             result = self.cursor.fetchone()
             if result:
                 return result
             else:
-                print(f"No entry found for chat_id {id}.")
-                return (0, 0)
+                logger.debug(f"No entry found for chat_id {id}.")
+                return (0, 0, 0)
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return (0, 0)
+            logger.error(f"Error: {err}")
+            return (0, 0, 0)
