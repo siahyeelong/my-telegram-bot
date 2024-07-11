@@ -139,12 +139,15 @@ class SQL_Database:
     
     def __enter__(self):
         '''Enter the runtime context related to this object.'''
+        logger.debug("SQL_Database class entered")
         return self
     
     def __exit__(self, exc_type, exc_value, traceback):
         '''Exit the runtime context related to this object.'''
+        logger.debug("SQL_Database class exited")
         self.close()
     
     def __del__(self):
         '''Destructor to ensure resources are released when the instance is deleted.'''
+        logger.debug("SQL_Database class deleted")
         self.close()

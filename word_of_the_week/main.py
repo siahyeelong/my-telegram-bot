@@ -2,7 +2,6 @@ from telegram import Update
 from telegram.ext import ContextTypes, Application, CommandHandler
 from keys import TELEGRAM_TOKEN, MAIN_CHAT_ID
 from sql_backend import SQL_Database
-database = SQL_Database()
 
 from datetime import time
 import pytz
@@ -28,6 +27,7 @@ def get_wotw() -> str:
 
 # Handlers
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    database = SQL_Database()
     database.insert_new_chat_id(update.message.chat.id, update.message.chat.username)
     await update.message.reply_text("welcome! you have just been subscribed to the weekly word-of-the-week message! if you wish to unsubscribe, just /unsubscribe")
     
@@ -35,14 +35,17 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text("this bot sends you a new word + its definition + 3 uses in a sentence every Monday at 6am. have fun learning!\n\n/start -- enrol in the weekly scheduled message\n/unsubscribe -- unsubscribe from the weekly message")
     
 async def unsubscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    database = SQL_Database()
     database.delete_record(update.message.chat.id)
     await update.message.reply_text("you have been unsubscribed. hope you had fun learning!")
 
-async def scheduled_messager(context: ContextTypes.DEFAULT_TYPE):
+async def scheduled_messager(context: ContextTypes.DEFAULT_TYPE):       
     wotw = get_wotw()
+    database = SQL_Database()
     ID_list = database.get_all_records()
     for ID in ID_list:
-        await context.bot.send_message(chat_id=ID, text=wotw)
+        logger.debug(f"sending {ID[0]} / {ID[1]} the message...")
+        await context.bot.send_message(chat_id=ID[0], text=wotw)
     
 async def error_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error(f"Update {update} caused error: {context.error}")

@@ -19,7 +19,7 @@ class ColorFormatter(logging.Formatter):
         log_message = super().format(record)
         return f"{log_color}{log_message}{Style.RESET_ALL}"
 
-def setup_logger(name='colored_logger', level=logging.DEBUG):
+def setup_logger(name=' ', level=logging.DEBUG):
     # Create a logger
     logger = logging.getLogger(name)
     logger.setLevel(level)  # Set the lowest level of logging

@@ -3,7 +3,6 @@ from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandl
 from keys import TELEGRAM_TOKEN, MAIN_CHAT_ID
 from chatgpt_assistant import GPT_assistant
 from sql_backend import SQL_Database
-database = SQL_Database()
 
 import pytz
 timezone = pytz.timezone('Asia/Singapore')
@@ -21,6 +20,7 @@ async def check_and_send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     username = update.message.chat.username
     question = update.message.text
     
+    database = SQL_Database()
     database.insert_new_chat_id(id)
     chat_count, max_count, threadID = database.get_row(id)
     if chat_count > max_count:
@@ -84,6 +84,7 @@ async def button(update: Update, context: CallbackContext) -> None:
     
     if chosen == 'grant':
         # Reset chat_count to 0
+        database = SQL_Database()
         database.reset_chat_count(chat_id)
         await query.edit_message_text(text=f"you have granted @{username} 10 more queries! yay!")
     else:
