@@ -8,7 +8,9 @@ import pytz
 timezone = pytz.timezone('Asia/Singapore')
 
 import pandas as pd
-csv_filename: str = "words.csv"
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+csv_filename: str = os.path.join(current_dir,"words.csv")
 df = pd.read_csv(csv_filename)
 
 # Logging set up

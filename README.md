@@ -6,6 +6,8 @@ This repo contains the telegram bots that I have created. Currently, there are 2
 
 This README contains instructions of how you can clone and run the bot for your own use if you so wish to
 
+The bots are currently run on my home's Raspberry Pi 4. I have also included the startup script to start the bot upon reboot.
+
 ---
 
 
