@@ -61,7 +61,7 @@ if __name__=="__main__":
     # Schedule the job to run at 6 AM every Monday
     job_minute = job_queue.run_daily(callback=scheduled_messager,                    # the callback function
                                      time=time(hour=6, minute=3, tzinfo=timezone),   # 6:03am
-                                     days=(2,))                                      # Tuesday is represented by 2
+                                     days=(2,5))                                      # Tuesday is represented by 2
 
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
