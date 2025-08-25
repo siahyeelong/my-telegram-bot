@@ -19,15 +19,15 @@ run_in_screen() {
 # Activate virtual environment and run scripts
 
 # Start 'wotw_bot' screen and run Python script
-source /home/yl/Desktop/my-telegram-bot/venv/bin/activate
-run_in_screen "wotw_bot" "/home/yl/Desktop/my-telegram-bot/venv/bin/python3" "/home/yl/Desktop/my-telegram-bot/word_of_the_week/main.py"
+source /home/yl/my-telegram-bot/venv/bin/activate
+run_in_screen "wotw_bot" "/home/yl/my-telegram-bot/venv/bin/python3" "/home/yl/my-telegram-bot/word_of_the_week/main.py"
 
 # Detach from virtual environment
 deactivate
 
 # Start 'chat_with_me_bot' screen and run Python script
-source /home/yl/Desktop/my-telegram-bot/venv/bin/activate
-run_in_screen "chat_with_me_bot" "/home/yl/Desktop/my-telegram-bot/venv/bin/python3" "/home/yl/Desktop/my-telegram-bot/chat_with_me/main.py"
+source /home/yl/my-telegram-bot/venv/bin/activate
+run_in_screen "chat_with_me_bot" "/home/yl/my-telegram-bot/venv/bin/python3" "/home/yl/my-telegram-bot/chat_with_me/main.py"
 
 # Detach from virtual environment
 deactivate

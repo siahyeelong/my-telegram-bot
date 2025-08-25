@@ -100,3 +100,9 @@ While the bot currently runs an OpenAI API in the back, I am exploring local LLM
     cd chat_with_me
     python main.py
     ```
+
+  ## Personal reference
+  1. Install mariadb and set password to db accordingly
+  1. sudo apt-get install screen
+  1. crontab -e
+  1. @reboot /home/yl/my-telegram-bot/telegram_bot_startup_script.sh

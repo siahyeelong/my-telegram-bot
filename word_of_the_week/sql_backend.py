@@ -83,9 +83,9 @@ class SQL_Database:
     
     def close(self):
         '''Close the cursor and the database connection.'''
-        if self.cursor:
+        if hasattr(self, "cursor"):
             self.cursor.close()
-        if self.db:
+        if hasattr(self, "db"):
             self.db.close()
     
     def __enter__(self):
