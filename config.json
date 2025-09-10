@@ -1,0 +1,12 @@
+{
+  "name": "YL's Telegram Bot",
+  "version": "1.0.0",
+  "slug": "telegram_bot",
+  "description": "my custom Telegram bot",
+  "arch": ["amd64", "armv7", "aarch64"],
+  "startup": "services",
+  "boot": "auto",
+  "options": {},
+  "schema": {}
+}
+
