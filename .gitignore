@@ -1,6 +1,6 @@
 keys.py
 venv
 test*
-example*
 __pycache__
 nohup*
+.DS_Store
